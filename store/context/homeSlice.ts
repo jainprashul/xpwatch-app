@@ -86,27 +86,29 @@ export const fetchTrending = createAsyncThunk("home/fetchTrending", async () => 
         const all = fetch(trending.all);
         const movies = fetch(trending.today.movies);
         const tv = fetch(trending.today.tv);
-        const anime = fetch(anilist.trending(1));
+        // const anime = fetch(anilist.trending(1));
         const bollywood = fetch(hindi.recentMovie(1));
-        const data = await Promise.allSettled([all, movies, tv, bollywood, anime]);
+        const data = await Promise.allSettled([all, movies, tv, bollywood]);
 
+        console.log(trending.all, trending.today.movies, trending.today.tv, hindi.recentMovie(1), anilist.trending(1));
         
-
         const res = await Promise.all(data.map((res) => {
             if (res.status === "fulfilled" && res.value.ok) {
+                
                 return res.value.json();
             }
             return null;
         }));
+
         return {
             all: res[0].results.map((item : Media) => (TMDB_to_MediaMini(item))),
             movies: res[1].results.map((item : Media) => (TMDB_to_MediaMini(item))),
             tv: res[2].results.map((item : Media) => (TMDB_to_MediaMini(item))),
             bollywood: res[3].results.map((movie: any) => (TMDB_to_MediaMini({ ...movie, media_type: "movie" }))),
-            anime: res[4]?.results.map((anime: any) => (AniList_to_MediaMini(anime))),
+            // anime: res[4]?.results.map((anime: any) => (AniList_to_MediaMini(anime))),
         }
     } catch (error) {
-        console.log(error);
+        console.log("error HOme", error);
         throw error;
     }
 });
@@ -204,7 +206,10 @@ export const homeSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder.addCase(fetchTrending.fulfilled, (state, action) => {
-            state.trending = action.payload;
+            state.trending = {
+                ...action.payload,
+                anime: [],
+            }
             state.lastRefreshed = Date.now();
         });
         builder.addCase(fetchTrending.rejected, (state, action) => {

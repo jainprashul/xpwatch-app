@@ -124,8 +124,8 @@ function SearchList({ data }: SProps) {
 
 async function fetchSearch(query: string, page: number = 1) {
   const tmdb = fetch(search.all(query, page))
-  const animex = fetch(anilist.search(query, page))
-  const [tmdbRes, animexRes] = await Promise.allSettled([tmdb, animex])
+  // const animex = fetch(anilist.search(query, page))
+  const [tmdbRes] = await Promise.allSettled([tmdb])
 
   let tmdbData: Result = {
     page: 0,
@@ -144,10 +144,10 @@ async function fetchSearch(query: string, page: number = 1) {
     tmdbData = await tmdbRes.value.json() 
   }
 
-  if (animexRes.status === 'fulfilled' && animexRes.value?.ok) {
-    animexData = await animexRes.value?.json()
-    // console.log(animexData)
-  }
+  // if (animexRes.status === 'fulfilled' && animexRes.value?.ok) {
+  //   animexData = await animexRes.value?.json()
+  //   // console.log(animexData)
+  // }
 
   const tmdbFiltered = tmdbData.results.filter(v => v.poster_path !== null).map((v) => (TMDB_to_MediaMini(v)))
 
